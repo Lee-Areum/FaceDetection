@@ -7,6 +7,7 @@ import cv2
 from tensorflow.keras.models import load_model
 import os
 import dlib
+import time
 
 # create list for landmarks
 ALL = list(range(0, 68))
@@ -161,13 +162,39 @@ class detection:
         cap = cv2.VideoCapture(0) #노트북 웹캠을 카메라로 사용
  #       cap.set(3,1280) #너비
   #      cap.set(4,960) #높이
-
+        prevTime = 0  # 이전 시간을 저장할 변수
         while(True):
             ret, frame = cap.read()
             frame = cv2.flip(frame, 1) #좌우 대칭 적용
 
             self.FaceDetection(frame, 1)
-            k = cv2.waitKey(1)# & 0xff #딜레이 시간 결정
+
+            ########### 추가 ##################
+            # 현재 시간 가져오기 (초단위로 가져옴)
+            curTime = time.time()
+
+            # 현재 시간에서 이전 시간을 빼면?
+            # 한번 돌아온 시간!!
+            sec = curTime - prevTime
+            # 이전 시간을 현재시간으로 다시 저장시킴
+            prevTime = curTime
+
+            # 프레임 계산 한바퀴 돌아온 시간을 1초로 나누면 된다.
+            # 1 / time per frame
+            fps = 1 / (sec)
+
+            # 디버그 메시지로 확인해보기
+            print("Time {0} ".format(sec))
+            print("Estimated fps {0} ".format(fps))
+
+            # 프레임 수를 문자열에 저장
+            str = "FPS : %0.1f" % fps
+
+            # 표시
+            cv2.putText(frame, str, (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+            ###################################
+
+            k = cv2.waitKey(1)& 0xff #딜레이 시간 결정
 
             if k ==27 : #ESC 키를 누르면 종료
                 break
